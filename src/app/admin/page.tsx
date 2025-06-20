@@ -5,8 +5,6 @@ import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import type { Store } from "@/types/store";
 
-const BASE_URL = typeof window !== "undefined" ? window.location.origin : "";
-
 export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,8 +66,12 @@ export default function AdminPage() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Login failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +115,12 @@ export default function AdminPage() {
       });
       setShowAddForm(false);
       setNewStoreLink(`${window.location.origin}/store/${docRef.id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to add store");
+      }
     } finally {
       setAddLoading(false);
     }
@@ -169,8 +175,12 @@ export default function AdminPage() {
       );
       setEditId(null);
       setEditForm(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to update store");
+      }
     } finally {
       setEditLoading(false);
     }

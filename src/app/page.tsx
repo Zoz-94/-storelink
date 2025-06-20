@@ -4,29 +4,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "f
 import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import type { Store } from "@/types/store";
-import StoreProfileCard from '../components/StoreProfileCard';
-import StoreProfileForm from '../components/StoreProfileForm';
-import { StoreProfile, StoreProfileFormData } from '../types/store';
 import Link from "next/link";
-
-// Mock data for example store
-const mockStore: StoreProfile = {
-  id: 'example-1',
-  storeName: "Sarah's Artisan Bakery",
-  description: "Handcrafted breads, pastries, and cakes made with love. Specializing in sourdough and French pastries. Custom orders welcome for special occasions!",
-  logoUrl: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800&auto=format&fit=crop&q=60",
-  location: "123 Baker Street, Downtown",
-  phoneNumber: "+1 (555) 123-4567",
-  email: "sarah@artisanbakery.com",
-  socialLinks: {
-    facebook: "https://facebook.com/sarahsartisanbakery",
-    instagram: "https://instagram.com/sarahsbakes",
-    telegram: "https://t.me/sarahsbakery",
-    website: "https://sarahsartisanbakery.com"
-  },
-  createdAt: new Date(),
-  updatedAt: new Date()
-};
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -87,8 +65,12 @@ export default function Home() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Login failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -132,8 +114,12 @@ export default function Home() {
       });
       setShowAddForm(false);
       setNewStoreLink(`${window.location.origin}/store/${docRef.id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to add store");
+      }
     } finally {
       setAddLoading(false);
     }
@@ -188,8 +174,12 @@ export default function Home() {
       );
       setEditId(null);
       setEditForm(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to update store");
+      }
     } finally {
       setEditLoading(false);
     }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import type { Store } from "@/types/store";
 import "./globals.css";
 
@@ -33,6 +33,9 @@ export default function Home() {
   });
   const [addLoading, setAddLoading] = useState(false);
   const [newStoreLink, setNewStoreLink] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<typeof addForm | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -128,8 +131,63 @@ export default function Home() {
     setStores((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const handleEditStore = () => {
-    // Removed unused 'store' parameter and body.
+  const handleEditStore = (store: Store) => {
+    setEditId(store.id);
+    setEditForm({
+      name: store.name || "",
+      logoUrl: store.logoUrl || "",
+      description: store.description || "",
+      openingHours: store.openingHours || "",
+      websiteUrl: store.websiteUrl || "",
+      whatsapp: store.whatsapp || "",
+      address: store.address || "",
+      phone: store.phone || "",
+      email: store.email || "",
+      locationUrl: store.locationUrl || "",
+      facebook: store.facebook || "",
+      instagram: store.instagram || "",
+      telegram: store.telegram || "",
+      googleReviewUrl: store.googleReviewUrl || "",
+    });
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!editForm) return;
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !editForm) return;
+    setEditLoading(true);
+    setError("");
+    try {
+      const now = Date.now();
+      await updateDoc(doc(db, "stores", editId), {
+        ...editForm,
+        updatedAt: now,
+      });
+      setStores((prev) =>
+        prev.map((s) =>
+          s.id === editId ? { ...s, ...editForm, updatedAt: now } as Store : s
+        )
+      );
+      setEditId(null);
+      setEditForm(null);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to update store");
+      }
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditId(null);
+    setEditForm(null);
   };
 
   if (!user) {
@@ -250,28 +308,54 @@ export default function Home() {
           <ul className="flex flex-col gap-4">
             {stores.map((store) => (
               <li key={store.id} className="flex items-stretch bg-white rounded-xl shadow border-l-4 border-blue-400 hover:shadow-lg transition overflow-hidden">
-                <div className="flex-1 p-4 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block w-2 h-2 rounded-full bg-blue-400" />
-                    <span className="font-semibold text-lg text-gray-900">{store.name}</span>
-                  </div>
-                  <div className="text-gray-600 text-sm mb-1 truncate">{store.description}</div>
-                  <div className="text-xs text-blue-700 break-all">Direct link: <a href={`/store/${store.id}`} className="underline" target="_blank" rel="noopener noreferrer">{`${window.location.origin}/store/${store.id}`}</a></div>
-                </div>
-                <div className="flex flex-col justify-center gap-2 p-2">
-                  <button
-                    onClick={() => handleEditStore()}
-                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs font-semibold"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteStore(store.id)}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs font-semibold"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {editId === store.id && editForm ? (
+                  <form onSubmit={handleEditSave} className="flex-1 flex flex-col gap-2 p-4 bg-blue-50">
+                    <input name="name" type="text" placeholder="Name" value={editForm.name} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" required />
+                    <input name="logoUrl" type="text" placeholder="Logo URL" value={editForm.logoUrl} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <textarea name="description" placeholder="Description" value={editForm.description} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="openingHours" type="text" placeholder="Opening Hours" value={editForm.openingHours} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="websiteUrl" type="text" placeholder="Website URL" value={editForm.websiteUrl} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="whatsapp" type="text" placeholder="WhatsApp" value={editForm.whatsapp} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="address" type="text" placeholder="Address" value={editForm.address} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="phone" type="text" placeholder="Phone" value={editForm.phone} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="email" type="email" placeholder="Email" value={editForm.email} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="locationUrl" type="text" placeholder="Location URL (Google Maps)" value={editForm.locationUrl} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="facebook" type="text" placeholder="Facebook" value={editForm.facebook} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="instagram" type="text" placeholder="Instagram" value={editForm.instagram} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="telegram" type="text" placeholder="Telegram" value={editForm.telegram} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <input name="googleReviewUrl" type="text" placeholder="Google Review URL" value={editForm.googleReviewUrl} onChange={handleEditFormChange} className="border border-gray-300 rounded px-3 py-2" />
+                    <div className="flex gap-2 mt-2">
+                      <button type="submit" className="bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 font-semibold" disabled={editLoading}>{editLoading ? "Saving..." : "Save"}</button>
+                      <button type="button" onClick={handleEditCancel} className="bg-gray-300 rounded px-4 py-2">Cancel</button>
+                    </div>
+                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex-1 p-4 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-block w-2 h-2 rounded-full bg-blue-400" />
+                        <span className="font-semibold text-lg text-gray-900">{store.name}</span>
+                      </div>
+                      <div className="text-gray-600 text-sm mb-1 truncate">{store.description}</div>
+                      <div className="text-xs text-blue-700 break-all">Direct link: <a href={`/store/${store.id}`} className="underline" target="_blank" rel="noopener noreferrer">{`${window.location.origin}/store/${store.id}`}</a></div>
+                    </div>
+                    <div className="flex flex-col justify-center gap-2 p-2">
+                      <button
+                        onClick={() => handleEditStore(store)}
+                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs font-semibold"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStore(store.id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs font-semibold"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
               </li>
             ))}
           </ul>

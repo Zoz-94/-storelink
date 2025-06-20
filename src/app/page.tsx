@@ -34,7 +34,6 @@ export default function Home() {
   const [addLoading, setAddLoading] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<typeof addForm | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
   const [newStoreLink, setNewStoreLink] = useState<string | null>(null);
 
   useEffect(() => {
@@ -149,45 +148,6 @@ export default function Home() {
       telegram: store.telegram || "",
       googleReviewUrl: store.googleReviewUrl || "",
     });
-  };
-
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (!editForm) return;
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handleEditSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editId || !editForm) return;
-    setEditLoading(true);
-    setError("");
-    try {
-      const now = Date.now();
-      await updateDoc(doc(db, "stores", editId), {
-        ...editForm,
-        updatedAt: now,
-      });
-      setStores((prev) =>
-        prev.map((s) =>
-          s.id === editId ? { ...s, ...editForm, updatedAt: now } as Store : s
-        )
-      );
-      setEditId(null);
-      setEditForm(null);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to update store");
-      }
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleEditCancel = () => {
-    setEditId(null);
-    setEditForm(null);
   };
 
   if (!user) {

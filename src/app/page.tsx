@@ -4,7 +4,6 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "f
 import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import type { Store } from "@/types/store";
-import Link from "next/link";
 
 export default function Home() {
   const [email, setEmail] = useState("");

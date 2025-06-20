@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import type { Store } from "@/types/store";
 import "./globals.css";
 
@@ -32,8 +32,6 @@ export default function Home() {
     googleReviewUrl: "",
   });
   const [addLoading, setAddLoading] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<typeof addForm | null>(null);
   const [newStoreLink, setNewStoreLink] = useState<string | null>(null);
 
   useEffect(() => {
@@ -131,23 +129,23 @@ export default function Home() {
   };
 
   const handleEditStore = (store: Store) => {
-    setEditId(store.id);
-    setEditForm({
-      name: store.name || "",
-      logoUrl: store.logoUrl || "",
-      description: store.description || "",
-      openingHours: store.openingHours || "",
-      websiteUrl: store.websiteUrl || "",
-      whatsapp: store.whatsapp || "",
-      address: store.address || "",
-      phone: store.phone || "",
-      email: store.email || "",
-      locationUrl: store.locationUrl || "",
-      facebook: store.facebook || "",
-      instagram: store.instagram || "",
-      telegram: store.telegram || "",
-      googleReviewUrl: store.googleReviewUrl || "",
-    });
+    // Removed: setEditId(store.id);
+    // Removed: setEditForm({
+    //   name: store.name || "",
+    //   logoUrl: store.logoUrl || "",
+    //   description: store.description || "",
+    //   openingHours: store.openingHours || "",
+    //   websiteUrl: store.websiteUrl || "",
+    //   whatsapp: store.whatsapp || "",
+    //   address: store.address || "",
+    //   phone: store.phone || "",
+    //   email: store.email || "",
+    //   locationUrl: store.locationUrl || "",
+    //   facebook: store.facebook || "",
+    //   instagram: store.instagram || "",
+    //   telegram: store.telegram || "",
+    //   googleReviewUrl: store.googleReviewUrl || "",
+    // });
   };
 
   if (!user) {

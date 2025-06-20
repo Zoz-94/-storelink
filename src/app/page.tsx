@@ -128,24 +128,8 @@ export default function Home() {
     setStores((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const handleEditStore = (store: Store) => {
-    // Removed: setEditId(store.id);
-    // Removed: setEditForm({
-    //   name: store.name || "",
-    //   logoUrl: store.logoUrl || "",
-    //   description: store.description || "",
-    //   openingHours: store.openingHours || "",
-    //   websiteUrl: store.websiteUrl || "",
-    //   whatsapp: store.whatsapp || "",
-    //   address: store.address || "",
-    //   phone: store.phone || "",
-    //   email: store.email || "",
-    //   locationUrl: store.locationUrl || "",
-    //   facebook: store.facebook || "",
-    //   instagram: store.instagram || "",
-    //   telegram: store.telegram || "",
-    //   googleReviewUrl: store.googleReviewUrl || "",
-    // });
+  const handleEditStore = () => {
+    // Removed unused 'store' parameter and body.
   };
 
   if (!user) {
@@ -276,7 +260,7 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col justify-center gap-2 p-2">
                   <button
-                    onClick={() => handleEditStore(store)}
+                    onClick={() => handleEditStore()}
                     className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs font-semibold"
                   >
                     Edit
